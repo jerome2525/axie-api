@@ -22,7 +22,7 @@ This project is a web application built using Node.js, Express.js, and MongoDB a
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/jerome2525/gig_rewards.git
+git clone https://github.com/jerome2525/axie-api.git
 cd gig_rewards
 ```
 
