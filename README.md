@@ -23,7 +23,7 @@ This project is a web application built using Node.js, Express.js, and MongoDB a
 
 ```bash
 git clone https://github.com/jerome2525/axie-api.git
-cd gig_rewards
+cd axie-api
 ```
 
 ### Install Dependencies
