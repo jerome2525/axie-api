@@ -39,27 +39,35 @@ router.post('/register',
     }
 );
 
-// User Login with Validation
-router.post('/login', 
-    body('username').isString().isLength({ min: 3, max: 30 }), // Validate username
-    body('password').isString().isLength({ min: 6 }), // Validate password
+const rateLimit = require('express-rate-limit');
+
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5,
+    message: { error: 'Too many login attempts, please try again later.' }
+});
+
+router.post('/login', loginLimiter,
+    body('username').isString().isLength({ min: 3, max: 30 }),
+    body('password').isString().isLength({ min: 8 }),
     async (req, res) => {
-        // Check for validation errors
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() }); // Return validation errors
+            return res.status(400).json({ errors: errors.array() });
         }
 
         const { username, password } = req.body;
 
-        const user = await User.findOne({ username });
-        if (user && await bcrypt.compare(password, user.password)) {
-            const token = jwt.sign({ id: user._id }, 'secret_key'); // Use a secure secret
-            res.json({ token });
-        } else {
-            res.status(400).json({ error: 'Invalid credentials' });
+        try {
+            const user = await User.findOne({ username });
+            if (user && await bcrypt.compare(password, user.password)) {
+                const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                res.json({ token });
+            } else {
+                res.status(400).json({ error: 'Invalid username or password.' });
+            }
+        } catch (err) {
+            res.status(500).json({ error: 'An error occurred during login.' });
         }
     }
 );
-
-module.exports = router;
